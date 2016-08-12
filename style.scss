@@ -1,5 +1,38 @@
 $white: #ffffff;
+$grapefruitPink: #ff6677;
+$grey: #bebebe;
+$rowHeight: 150px;
+$dateFontSize: 25px;
 
 body{
 	background-color: $white;
+}
+
+.dateRow{
+
+	p{
+		color: $grapefruitPink;
+		display: inline;
+		font-family: 'Josefin Sans', sans-serif;
+		font-size: $dateFontSize;
+	}
+
+	border-bottom-color: $grey;
+	border-bottom-style: solid;
+	border-bottom-width: 1px;
+	height: $rowHeight;
+	width: 50%;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 12px;
+}
+
+.add{
+	height: 25px;
+	width: 23px;
+	float: right;
+	margin-right: 25px;
+	&:hover{
+		cursor: pointer;
+	}
 }
