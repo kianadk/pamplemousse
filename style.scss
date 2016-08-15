@@ -1,6 +1,7 @@
 $white: #ffffff;
 $grapefruitPink: #ff6677;
 $grey: #bebebe;
+$darkGrey: #666666;
 $rowHeight: 150px;
 $dateFontSize: 25px;
 
@@ -9,13 +10,6 @@ body{
 }
 
 .dateRow{
-
-	p{
-		color: $grapefruitPink;
-		display: inline;
-		font-family: 'Josefin Sans', sans-serif;
-		font-size: $dateFontSize;
-	}
 
 	border-bottom-color: $grey;
 	border-bottom-style: solid;
@@ -28,11 +22,33 @@ body{
 }
 
 .add{
-	height: 25px;
-	width: 23px;
-	float: right;
-	margin-right: 25px;
-	&:hover{
-		cursor: pointer;
+	display: inline;
+	img{
+		height: 25px;
+		width: 23px;
+		float: right;
+		margin-right: 25px;
+		&:hover{
+			cursor: pointer;
+		}
 	}
+}
+
+.rowHeader{
+	color: $grapefruitPink;
+	display: block;
+	font-family: 'Josefin Sans', sans-serif;
+	font-size: $dateFontSize;
+
+	p{
+		display: inline;
+	}
+}
+
+.rowContent{
+	color: $darkGrey;
+}
+
+.noShow{
+	display: none;
 }

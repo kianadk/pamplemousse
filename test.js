@@ -1,3 +1,6 @@
+var Modal = ReactBootstrap.Modal;
+var Button = ReactBootstrap.Button;
+
 var App = React.createClass({
 	getInitialState: function(){
 		return {
@@ -47,10 +50,10 @@ var DateTableRow = React.createClass({
 		this.setState({hover: false});
 	},
 	render: function() {
-		//TODO: Display DateTableRowContent
 		return (
 			<div className="dateRow" onMouseEnter={this.mouseEnter} onMouseLeave={this.mouseLeave} >
-				<DateTableRowHeader date={this.props.date} hover={this.state.hover}  />
+				<DateTableRowHeader date={this.props.date} hover={this.state.hover} />
+				<DateTableRowContent />
 			</div>
 		);
 	}
@@ -60,11 +63,34 @@ var DateTableRow = React.createClass({
 var DateTableRowHeader = React.createClass({
 	render: function(){
 		return (
-			<div>
+			<div className="rowHeader">
 				<DateTableRowDate date={this.props.date} />
 				<DateTableRowAddButton rowHover={this.props.hover} />
 			</div>
 		);
+	}
+});
+
+var DateTableRowContent = React.createClass({
+	getInitialState: function(){
+		return ({entries: 0});
+	},
+	render: function(){
+		//TODO: Avoid repeated code
+		if(this.state.entries == 0){
+			return(
+				<div className="rowContent">
+					<p>No plans yet</p>
+				</div>
+			)
+		}
+		else{
+			return(
+				<div className="rowContent">
+					<p>There are hella plans</p>
+				</div>
+			)
+		}
 	}
 });
 
@@ -75,16 +101,51 @@ var DateTableRowDate = React.createClass({
 });
 
 var DateTableRowAddButton = React.createClass({
+	getInitialState: function(){
+		return ({hover: false, showModal: false});
+	},
 	add: function(){
-		console.log("hello");
+		this.setState(function(previousState, currentProps){
+			return ({hover: previousState.hover, showModal: true});
+		});
+	},
+	cancel: function(){
+		this.setState(function(previousState, currentProps){
+			return {hover: previousState.hover, showModal: false};
+		});
+	},
+	mouseEnter: function(){
+		this.setState(function(previousState, currentProps){
+			return {hover: true, showModal: previousState.showModal};
+		});
+	},
+	mouseLeave: function(){
+		this.setState(function(previousState, currentProps){
+			return {hover: false, showModal: previousState.showModal};
+		});
 	},
 	render: function(){
+		var buttonClass = "noShow";
 		if(this.props.rowHover){
-			return (<img className="add" src="greyPlus.svg" onClick={this.add} />);
+			buttonClass = "add";
 		}
-		 else{
-		 	return null;
-		 }
+		var plus = "greyPlus.svg";
+		if(this.state.hover){
+			plus = "selectedPlus.svg";
+		}
+
+		return (
+			<div className={buttonClass}>
+				<img src={plus} onClick={this.add} onMouseEnter={this.mouseEnter} onMouseLeave={this.mouseLeave} />
+				<Modal show={this.state.showModal} onHide={this.cancel} >
+					<Modal.Body>
+						<p>
+							heyyyyy
+						</p>
+					</Modal.Body>
+				</Modal>
+			</div>
+		);	
 	}
 });
 

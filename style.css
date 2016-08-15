@@ -10,18 +10,29 @@ body {
   margin-left: auto;
   margin-right: auto;
   padding: 12px; }
-  .dateRow p {
-    color: #ff6677;
-    display: inline;
-    font-family: 'Josefin Sans', sans-serif;
-    font-size: 25px; }
 
 .add {
-  height: 25px;
-  width: 23px;
-  float: right;
-  margin-right: 25px; }
-  .add:hover {
-    cursor: pointer; }
+  display: inline; }
+  .add img {
+    height: 25px;
+    width: 23px;
+    float: right;
+    margin-right: 25px; }
+    .add img:hover {
+      cursor: pointer; }
+
+.rowHeader {
+  color: #ff6677;
+  display: block;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 25px; }
+  .rowHeader p {
+    display: inline; }
+
+.rowContent {
+  color: #666666; }
+
+.noShow {
+  display: none; }
 
 /*# sourceMappingURL=style.css.map */
