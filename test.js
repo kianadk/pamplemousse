@@ -1,5 +1,8 @@
 var Modal = ReactBootstrap.Modal;
 var Button = ReactBootstrap.Button;
+var FormGroup = ReactBootstrap.FormGroup;
+var ControlLabel = ReactBootstrap.ControlLabel;
+var FormControl = ReactBootstrap.FormControl;
 
 var App = React.createClass({
 	getInitialState: function(){
@@ -10,13 +13,23 @@ var App = React.createClass({
 	},
 	render: function(){
 		//TODO: Add the rest of the app's UI
-		return (<DateTable page={this.state.page} currentDate={this.state.currentDate} />);
+		return (
+			<div>
+				<DateTable page={this.state.page} currentDate={this.state.currentDate} />
+			</div>
+		);
 	}
 });
 
 var DateTable = React.createClass({
 	render: function(){
-		return (<DateTablePage page={this.props.page} currentDate={this.props.currentDate} />)
+		//TODO: Make the page number pretty
+		return (
+			<div>
+				<DateTablePage page={this.props.page} currentDate={this.props.currentDate} />
+				<p>{this.props.page}</p>
+			</div>
+		);
 	} 
 });
 
@@ -32,7 +45,7 @@ var DateTablePage = React.createClass({
 		return (
 			<div>
 				{dates.map(function(value, index){
-					return <DateTableRow key={index} date={value} />
+					return <DateTableRow key={index} date={value}/>
 				})}
 			</div>
 		)
@@ -41,19 +54,34 @@ var DateTablePage = React.createClass({
 
 var DateTableRow = React.createClass({
 	getInitialState: function(){
-		return ({hover: false});
+		return ({hover: false, meals: []});
 	},
 	mouseEnter: function(){
-		this.setState({hover: true});
+		this.setState(function(previousState, currentProps){
+			return {hover: true, meals: previousState.meals};
+		});
 	},
 	mouseLeave: function(){
-		this.setState({hover: false});
+		this.setState(function(previousState, currentProps){
+			return {hover: false, meals: previousState.meals};
+		});
+	},
+	addMeal: function(){
+		console.log("adding a meal");
+		this.setState(function(previousState, currentProps){
+			console.log("setting state of meals array...");
+			previousState.meals.push("hi");
+			return {hover: previousState.hover, meals: previousState.meals};
+		});
 	},
 	render: function() {
+		var meals = this.state.meals.map(function(value, index){
+			return (<p key={index}>{value}</p>);
+		});
 		return (
 			<div className="dateRow" onMouseEnter={this.mouseEnter} onMouseLeave={this.mouseLeave} >
-				<DateTableRowHeader date={this.props.date} hover={this.state.hover} />
-				<DateTableRowContent />
+				<DateTableRowHeader date={this.props.date} hover={this.state.hover} handleAdd={this.addMeal}/>
+				<DateTableRowContent meals={meals}/>
 			</div>
 		);
 	}
@@ -65,19 +93,16 @@ var DateTableRowHeader = React.createClass({
 		return (
 			<div className="rowHeader">
 				<DateTableRowDate date={this.props.date} />
-				<DateTableRowAddButton rowHover={this.props.hover} />
+				<DateTableRowAddButton rowHover={this.props.hover} handleAdd={this.props.handleAdd} />
 			</div>
 		);
 	}
 });
 
 var DateTableRowContent = React.createClass({
-	getInitialState: function(){
-		return ({entries: 0});
-	},
 	render: function(){
 		//TODO: Avoid repeated code
-		if(this.state.entries == 0){
+		if(this.props.meals.length == 0){
 			return(
 				<div className="rowContent">
 					<p>No plans yet</p>
@@ -86,10 +111,10 @@ var DateTableRowContent = React.createClass({
 		}
 		else{
 			return(
-				<div className="rowContent">
-					<p>There are hella plans</p>
-				</div>
-			)
+					<div className="rowContent">
+					{this.props.meals}
+					</div>
+			);
 		}
 	}
 });
@@ -124,6 +149,10 @@ var DateTableRowAddButton = React.createClass({
 			return {hover: false, showModal: previousState.showModal};
 		});
 	},
+	save: function(){
+		this.props.handleAdd();
+		this.cancel();
+	},
 	render: function(){
 		var buttonClass = "noShow";
 		if(this.props.rowHover){
@@ -138,10 +167,32 @@ var DateTableRowAddButton = React.createClass({
 			<div className={buttonClass}>
 				<img src={plus} onClick={this.add} onMouseEnter={this.mouseEnter} onMouseLeave={this.mouseLeave} />
 				<Modal show={this.state.showModal} onHide={this.cancel} >
+					<Modal.Header closeButton>
+						<Modal.Title>Add meal</Modal.Title>
+					</Modal.Header>
 					<Modal.Body>
-						<p>
-							heyyyyy
-						</p>
+						<FormGroup
+							controlId="chef"
+						>
+							<ControlLabel>Chef Name</ControlLabel>
+							<FormControl
+								type="text"
+								placeholder="Who are you?!"
+							/>
+						</FormGroup>
+						<FormGroup>
+							<ControlLabel>Whatcha cookin&#39;?</ControlLabel>
+							<FormControl
+								type="text"
+								placeholder="What's the dish called?"
+							/>
+						</FormGroup>
+						<Button onClick={this.save}>
+							Save
+						</Button>
+						<Button onClick={this.cancel}>
+							Cancel
+						</Button>
 					</Modal.Body>
 				</Modal>
 			</div>
