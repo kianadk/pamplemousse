@@ -14,7 +14,7 @@ body{
 	border-bottom-color: $grey;
 	border-bottom-style: solid;
 	border-bottom-width: 1px;
-	height: $rowHeight;
+	min-height: $rowHeight;
 	width: 50%;
 	margin-left: auto;
 	margin-right: auto;

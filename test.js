@@ -66,11 +66,11 @@ var DateTableRow = React.createClass({
 			return {hover: false, meals: previousState.meals};
 		});
 	},
-	addMeal: function(){
+	addMeal: function(chef, meal){
 		console.log("adding a meal");
 		this.setState(function(previousState, currentProps){
 			console.log("setting state of meals array...");
-			previousState.meals.push("hi");
+			previousState.meals.push(chef + " is making " + meal);
 			return {hover: previousState.hover, meals: previousState.meals};
 		});
 	},
@@ -149,8 +149,9 @@ var DateTableRowAddButton = React.createClass({
 			return {hover: false, showModal: previousState.showModal};
 		});
 	},
-	save: function(){
-		this.props.handleAdd();
+	save: function(chef, food){
+		console.log("chef: " + chef + " food: " + food);
+		this.props.handleAdd(chef, food);
 		this.cancel();
 	},
 	render: function(){
@@ -167,36 +168,56 @@ var DateTableRowAddButton = React.createClass({
 			<div className={buttonClass}>
 				<img src={plus} onClick={this.add} onMouseEnter={this.mouseEnter} onMouseLeave={this.mouseLeave} />
 				<Modal show={this.state.showModal} onHide={this.cancel} >
-					<Modal.Header closeButton>
-						<Modal.Title>Add meal</Modal.Title>
-					</Modal.Header>
-					<Modal.Body>
-						<FormGroup
-							controlId="chef"
-						>
-							<ControlLabel>Chef Name</ControlLabel>
-							<FormControl
-								type="text"
-								placeholder="Who are you?!"
-							/>
-						</FormGroup>
-						<FormGroup>
-							<ControlLabel>Whatcha cookin&#39;?</ControlLabel>
-							<FormControl
-								type="text"
-								placeholder="What's the dish called?"
-							/>
-						</FormGroup>
-						<Button onClick={this.save}>
-							Save
-						</Button>
-						<Button onClick={this.cancel}>
-							Cancel
-						</Button>
-					</Modal.Body>
+					<AddMealDialog save={this.save} cancel={this.cancel}/>
 				</Modal>
 			</div>
 		);	
+	}
+});
+
+var AddMealDialog = React.createClass({
+	getInitialState: function(){
+		return {chef: "", meal: ""};
+	},
+	updateChef: function(e){
+		this.setState({chef: e.target.value});
+	},
+	updateMeal: function(e){
+		this.setState({meal: e.target.value});
+	},
+	render: function(){
+		return(
+			<div>
+				<Modal.Header closeButton>
+					<Modal.Title>Add meal</Modal.Title>
+				</Modal.Header>
+				<Modal.Body>
+					<FormGroup controlId="chef">
+						<ControlLabel>Chef Name</ControlLabel>
+						<FormControl
+							type="text"
+							value={this.state.value}
+							placeholder="Who are you?!"
+							onChange={this.updateChef}
+						/>
+					</FormGroup>
+					<FormGroup>
+						<ControlLabel>Whatcha cookin&#39;?</ControlLabel>
+						<FormControl
+							type="text"
+							placeholder="What's the dish called?"
+							onChange={this.updateMeal}
+						/>
+					</FormGroup>
+					<Button onClick={this.props.save.bind(null, this.state.chef, this.state.meal)}>
+						Save
+					</Button>
+					<Button onClick={this.props.cancel}>
+						Cancel
+					</Button>
+				</Modal.Body>
+			</div>
+		);
 	}
 });
 
