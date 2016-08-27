@@ -56,6 +56,22 @@ var DateTableRow = React.createClass({
 	getInitialState: function(){
 		return ({hover: false, meals: []});
 	},
+	loadData: function(){
+		$.ajax({
+			url: '/meals',
+			dataType: 'json',
+			cache: false,
+			success: function(meals){
+				this.setState({meals: meals});
+			}.bind(this),
+			error: function(xhr, status, err){
+				console.log(err);
+			}.bind(this)
+		});
+	},
+	componentDidMount: function(){
+		this.loadData();
+	},
 	mouseEnter: function(){
 		this.setState(function(previousState, currentProps){
 			return {hover: true, meals: previousState.meals};
@@ -67,21 +83,31 @@ var DateTableRow = React.createClass({
 		});
 	},
 	addMeal: function(chef, meal){
-		console.log("adding a meal");
-		this.setState(function(previousState, currentProps){
-			console.log("setting state of meals array...");
-			previousState.meals.push(chef + " is making " + meal);
-			return {hover: previousState.hover, meals: previousState.meals};
+
+		//optimistically update local data
+		var oldMeals = this.state.meals;
+		this.setState({meals: oldMeals.concat(["bob is making tacos"])});
+
+		//update database
+		$.ajax({
+			url: '/meals',
+			dataType: 'json',
+			type: 'POST',
+			data: {chef: chef, food: meal},
+			success: function(meal){
+				console.log("updated db successfully");
+			}.bind(this),
+			error: function(xhr, status, err){
+				this.setState({meals: oldMeals});
+				console.log("error updating db");
+			}.bind(this)
 		});
 	},
 	render: function() {
-		var meals = this.state.meals.map(function(value, index){
-			return (<p key={index}>{value}</p>);
-		});
 		return (
 			<div className="dateRow" onMouseEnter={this.mouseEnter} onMouseLeave={this.mouseLeave} >
 				<DateTableRowHeader date={this.props.date} hover={this.state.hover} handleAdd={this.addMeal}/>
-				<DateTableRowContent meals={meals}/>
+				<DateTableRowContent meals={this.state.meals}/>
 			</div>
 		);
 	}
@@ -110,12 +136,28 @@ var DateTableRowContent = React.createClass({
 			)
 		}
 		else{
+
 			return(
-					<div className="rowContent">
-					{this.props.meals}
-					</div>
+				<div className="rowContent">
+					{this.props.meals.map(function(value, index){
+						return <MealItem key={index} chef={value.chef} food={value.food}/>
+					})}
+				</div>
 			);
+
+			// return(
+			// 		<div className="rowContent">
+			// 		{this.props.meals}
+			// 		</div>
+			// );
 		}
+	}
+});
+
+var MealItem = React.createClass({
+	render: function(){
+		console.log(this.props.chef);
+		return (<p>{this.props.chef} is making {this.props.food}</p>);
 	}
 });
 
@@ -150,7 +192,6 @@ var DateTableRowAddButton = React.createClass({
 		});
 	},
 	save: function(chef, food){
-		console.log("chef: " + chef + " food: " + food);
 		this.props.handleAdd(chef, food);
 		this.cancel();
 	},
