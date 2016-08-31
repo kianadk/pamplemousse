@@ -73,27 +73,24 @@ var DateTableRow = React.createClass({
 		this.loadData();
 	},
 	mouseEnter: function(){
-		this.setState(function(previousState, currentProps){
-			return {hover: true, meals: previousState.meals};
-		});
+		this.setState({hover: true});
 	},
 	mouseLeave: function(){
-		this.setState(function(previousState, currentProps){
-			return {hover: false, meals: previousState.meals};
-		});
+		this.setState({hover: false});
 	},
-	addMeal: function(chef, meal){
+	addMeal: function(chef, meal, date){
 
 		//optimistically update local data
 		var oldMeals = this.state.meals;
-		this.setState({meals: oldMeals.concat(["bob is making tacos"])});
+		this.setState({meals: oldMeals.concat([{chef: chef, food: meal, date: date}])});
+		console.log("the date we're looking at is " + date);
 
 		//update database
 		$.ajax({
 			url: '/meals',
 			dataType: 'json',
 			type: 'POST',
-			data: {chef: chef, food: meal},
+			data: {chef: chef, food: meal, date: date},
 			success: function(meal){
 				console.log("updated db successfully");
 			}.bind(this),
@@ -107,7 +104,7 @@ var DateTableRow = React.createClass({
 		return (
 			<div className="dateRow" onMouseEnter={this.mouseEnter} onMouseLeave={this.mouseLeave} >
 				<DateTableRowHeader date={this.props.date} hover={this.state.hover} handleAdd={this.addMeal}/>
-				<DateTableRowContent meals={this.state.meals}/>
+				<DateTableRowContent date={this.props.date} meals={this.state.meals}/>
 			</div>
 		);
 	}
@@ -119,7 +116,7 @@ var DateTableRowHeader = React.createClass({
 		return (
 			<div className="rowHeader">
 				<DateTableRowDate date={this.props.date} />
-				<DateTableRowAddButton rowHover={this.props.hover} handleAdd={this.props.handleAdd} />
+				<DateTableRowAddButton rowHover={this.props.hover} handleAdd={this.props.handleAdd} date={this.props.date}/>
 			</div>
 		);
 	}
@@ -140,8 +137,11 @@ var DateTableRowContent = React.createClass({
 			return(
 				<div className="rowContent">
 					{this.props.meals.map(function(value, index){
-						return <MealItem key={index} chef={value.chef} food={value.food}/>
-					})}
+						var date = new Date(value.date);
+						//display meal in this row if it occurs on this day
+						if( this.props.date.toDateString() == date.toDateString())
+							return <MealItem key={index} chef={value.chef} food={value.food} date={value.date}/>
+					}, this)}
 				</div>
 			);
 
@@ -156,8 +156,9 @@ var DateTableRowContent = React.createClass({
 
 var MealItem = React.createClass({
 	render: function(){
-		console.log(this.props.chef);
-		return (<p>{this.props.chef} is making {this.props.food}</p>);
+		console.log(this.props.date);
+		var date = new Date(this.props.date);
+		return (<p>{this.props.chef} is making {this.props.food} on {date.toDateString()}</p>);
 	}
 });
 
@@ -191,8 +192,9 @@ var DateTableRowAddButton = React.createClass({
 			return {hover: false, showModal: previousState.showModal};
 		});
 	},
-	save: function(chef, food){
-		this.props.handleAdd(chef, food);
+	save: function(chef, food, meal){
+		console.log("chef is " + chef + ", food is " + food + ", meal is " + meal);
+		this.props.handleAdd(chef, food, meal);
 		this.cancel();
 	},
 	render: function(){
@@ -209,7 +211,7 @@ var DateTableRowAddButton = React.createClass({
 			<div className={buttonClass}>
 				<img src={plus} onClick={this.add} onMouseEnter={this.mouseEnter} onMouseLeave={this.mouseLeave} />
 				<Modal show={this.state.showModal} onHide={this.cancel} >
-					<AddMealDialog save={this.save} cancel={this.cancel}/>
+					<AddMealDialog save={this.save} cancel={this.cancel} date={this.props.date}/>
 				</Modal>
 			</div>
 		);	
@@ -250,7 +252,7 @@ var AddMealDialog = React.createClass({
 							onChange={this.updateMeal}
 						/>
 					</FormGroup>
-					<Button onClick={this.props.save.bind(null, this.state.chef, this.state.meal)}>
+					<Button onClick={this.props.save.bind(null, this.state.chef, this.state.meal, this.props.date)}>
 						Save
 					</Button>
 					<Button onClick={this.props.cancel}>

@@ -32,6 +32,7 @@ router.route('/meals')
 		var meal = new Meal();
 		meal.chef = req.body.chef;
 		meal.food = req.body.food;
+		meal.date = req.body.date;
 		meal.save(function(err){
 			if(err)
 				res.send(err);
