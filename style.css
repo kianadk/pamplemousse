@@ -11,6 +11,9 @@ body {
   margin-right: auto;
   padding: 12px; }
 
+.mealItem p {
+  display: inline; }
+
 .add {
   display: inline; }
   .add img {
@@ -20,6 +23,13 @@ body {
     margin-right: 25px; }
     .add img:hover {
       cursor: pointer; }
+
+.delete {
+  display: inline;
+  float: right;
+  height: 20px; }
+  .delete:hover {
+    cursor: pointer; }
 
 .rowHeader {
   color: #ff6677;

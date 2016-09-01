@@ -37,6 +37,16 @@ router.route('/meals')
 			if(err)
 				res.send(err);
 			console.log("added meal to db");
+			res.json({message: "addition successful"});
+		});
+	})
+	.delete(function(req, res){
+		Meal.remove({_id: req.body.id},
+		function(err, meal){
+			if(err)
+				res.send(err);
+			console.log("db deletion done");
+			res.json({message: "deletion successful"});
 		});
 	});
 

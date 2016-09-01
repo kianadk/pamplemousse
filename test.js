@@ -60,6 +60,7 @@ var DateTableRow = React.createClass({
 		$.ajax({
 			url: '/meals',
 			dataType: 'json',
+			type: 'GET',
 			cache: false,
 			success: function(meals){
 				this.setState({meals: meals});
@@ -83,7 +84,6 @@ var DateTableRow = React.createClass({
 		//optimistically update local data
 		var oldMeals = this.state.meals;
 		this.setState({meals: oldMeals.concat([{chef: chef, food: meal, date: date}])});
-		console.log("the date we're looking at is " + date);
 
 		//update database
 		$.ajax({
@@ -92,6 +92,7 @@ var DateTableRow = React.createClass({
 			type: 'POST',
 			data: {chef: chef, food: meal, date: date},
 			success: function(meal){
+				this.loadData();
 				console.log("updated db successfully");
 			}.bind(this),
 			error: function(xhr, status, err){
@@ -104,7 +105,7 @@ var DateTableRow = React.createClass({
 		return (
 			<div className="dateRow" onMouseEnter={this.mouseEnter} onMouseLeave={this.mouseLeave} >
 				<DateTableRowHeader date={this.props.date} hover={this.state.hover} handleAdd={this.addMeal}/>
-				<DateTableRowContent date={this.props.date} meals={this.state.meals}/>
+				<DateTableRowContent date={this.props.date} meals={this.state.meals} update={this.loadData}/>
 			</div>
 		);
 	}
@@ -124,8 +125,17 @@ var DateTableRowHeader = React.createClass({
 
 var DateTableRowContent = React.createClass({
 	render: function(){
+
+		//figure out which of the meals in the db are today's
+		var todaysMeals = [];
+		for(var i = 0; i < this.props.meals.length; i++){
+			var date = new Date(this.props.meals[i].date);
+			if(this.props.date.toDateString() == date.toDateString())
+				todaysMeals.push(this.props.meals[i]);
+		}
+
 		//TODO: Avoid repeated code
-		if(this.props.meals.length == 0){
+		if(todaysMeals.length == 0){
 			return(
 				<div className="rowContent">
 					<p>No plans yet</p>
@@ -136,29 +146,51 @@ var DateTableRowContent = React.createClass({
 
 			return(
 				<div className="rowContent">
-					{this.props.meals.map(function(value, index){
-						var date = new Date(value.date);
-						//display meal in this row if it occurs on this day
-						if( this.props.date.toDateString() == date.toDateString())
-							return <MealItem key={index} chef={value.chef} food={value.food} date={value.date}/>
+					{todaysMeals.map(function(value, index){
+						return <MealItem key={index} chef={value.chef} food={value.food} date={value.date} id={value._id} update={this.props.update}/>
 					}, this)}
 				</div>
 			);
-
-			// return(
-			// 		<div className="rowContent">
-			// 		{this.props.meals}
-			// 		</div>
-			// );
 		}
 	}
 });
 
 var MealItem = React.createClass({
+	getInitialState: function(){
+		return ({hover: false});
+	},
+	mouseEnter: function(){
+		this.setState({hover: true});
+	},
+	mouseLeave: function(){
+		this.setState({hover: false});
+	},
+	deleteMeal: function(){
+		$.ajax({
+			url: '/meals',
+			dataType: 'json',
+			type: 'DELETE',
+			data: {id: this.props.id},
+			success: function(meal){
+				console.log("deleted meal successfully");
+			}.bind(this),
+			error: function(xhr, status, err){
+				console.log("error deleting meal");
+			}
+		});
+		this.props.update();
+	},
 	render: function(){
-		console.log(this.props.date);
 		var date = new Date(this.props.date);
-		return (<p>{this.props.chef} is making {this.props.food} on {date.toDateString()}</p>);
+		var buttonClass = "noShow";
+		if(this.state.hover)
+			buttonClass = "delete";
+		return (
+			<div onMouseEnter={this.mouseEnter} onMouseLeave={this.mouseLeave} className="mealItem">
+				<p>{this.props.chef} is making {this.props.food}</p>
+				<img className={buttonClass} src="delete.svg" onClick={this.deleteMeal}/>
+			</div>
+		);
 	}
 });
 
@@ -192,9 +224,8 @@ var DateTableRowAddButton = React.createClass({
 			return {hover: false, showModal: previousState.showModal};
 		});
 	},
-	save: function(chef, food, meal){
-		console.log("chef is " + chef + ", food is " + food + ", meal is " + meal);
-		this.props.handleAdd(chef, food, meal);
+	save: function(chef, food, date){
+		this.props.handleAdd(chef, food, date);
 		this.cancel();
 	},
 	render: function(){

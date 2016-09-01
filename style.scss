@@ -21,6 +21,12 @@ body{
 	padding: 12px;
 }
 
+.mealItem{
+	p{
+		display: inline;
+	}
+}
+
 .add{
 	display: inline;
 	img{
@@ -31,6 +37,15 @@ body{
 		&:hover{
 			cursor: pointer;
 		}
+	}
+}
+
+.delete{
+	display: inline;
+	float: right;
+	height: 20px;
+	&:hover{
+		cursor: pointer;
 	}
 }
 
