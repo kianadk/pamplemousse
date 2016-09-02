@@ -24,6 +24,21 @@ body {
     .add img:hover {
       cursor: pointer; }
 
+.footer {
+  margin-top: 50px;
+  margin-bottom: 50px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center; }
+  .footer p {
+    display: inline;
+    color: #666666;
+    font-size: 14px; }
+  .footer img {
+    height: 25px; }
+    .footer img:hover {
+      cursor: pointer; }
+
 .delete {
   display: inline;
   float: right;

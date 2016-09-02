@@ -4,6 +4,7 @@ $grey: #bebebe;
 $darkGrey: #666666;
 $rowHeight: 150px;
 $dateFontSize: 25px;
+$footerFontSize: 14px;
 
 body{
 	background-color: $white;
@@ -34,6 +35,25 @@ body{
 		width: 23px;
 		float: right;
 		margin-right: 25px;
+		&:hover{
+			cursor: pointer;
+		}
+	}
+}
+
+.footer{
+	margin-top: 50px;
+	margin-bottom: 50px;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+	p{
+		display: inline;
+		color: $darkGrey;
+		font-size: $footerFontSize
+	}
+	img{
+		height: 25px;
 		&:hover{
 			cursor: pointer;
 		}

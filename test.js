@@ -11,11 +11,24 @@ var App = React.createClass({
 			currentDate: new Date()
 		};
 	},
+	back: function(){
+		this.setState(function(previousState){
+			if(previousState.page != 1)
+				return ({page: previousState.page - 1});
+			else
+				return ({page: previousState.page});
+		});
+	},
+	next: function(){
+		this.setState(function(previousState){
+			return({page: previousState.page + 1});
+		});
+	},
 	render: function(){
 		//TODO: Add the rest of the app's UI
 		return (
 			<div>
-				<DateTable page={this.state.page} currentDate={this.state.currentDate} />
+				<DateTable page={this.state.page} currentDate={this.state.currentDate} back={this.back} next={this.next}/>
 			</div>
 		);
 	}
@@ -23,14 +36,25 @@ var App = React.createClass({
 
 var DateTable = React.createClass({
 	render: function(){
-		//TODO: Make the page number pretty
 		return (
 			<div>
 				<DateTablePage page={this.props.page} currentDate={this.props.currentDate} />
-				<p>{this.props.page}</p>
+				<PageFooter page={this.props.page} back={this.props.back} next={this.props.next}/>
 			</div>
 		);
 	} 
+});
+
+var PageFooter = React.createClass({
+	render: function(){
+		return (
+		<div className="footer">
+			<img src="prev.svg" onClick={this.props.back}/>
+			<p>{this.props.page}</p>
+			<img src="next.svg" onClick={this.props.next}/>
+		</div>
+		);
+	}
 });
 
 var DateTablePage = React.createClass({
@@ -39,7 +63,7 @@ var DateTablePage = React.createClass({
 		var dates = []
 		var i
 		for(i = 0; i < 7; i++){
-			dates.push(new Date(this.props.currentDate.getTime() + (i * DAY) ) )
+			dates.push(new Date(this.props.currentDate.getTime() + (i * DAY) + ((this.props.page - 1) * 7 * DAY) ) )
 		}
 
 		return (
