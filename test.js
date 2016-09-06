@@ -181,7 +181,7 @@ var DateTableRowContent = React.createClass({
 
 var MealItem = React.createClass({
 	getInitialState: function(){
-		return ({hover: false});
+		return ({hover: false, showModal: false});
 	},
 	mouseEnter: function(){
 		this.setState({hover: true});
@@ -204,6 +204,31 @@ var MealItem = React.createClass({
 		});
 		this.props.update();
 	},
+	editMeal: function(){
+		this.setState({showModal: true});
+	},
+	cancel: function(){
+		this.setState({showModal: false});
+	},
+	handleEdit: function(chef, food, id){
+		console.log("handling edit");
+		var editURL = '/meals/' + id;
+		$.ajax({
+			url: editURL,
+			dataType: 'json',
+			type: 'PUT',
+			cache: false,
+			data: {chef: chef, food: food},
+			success: function(){
+				console.log("handled edit successfully");
+			}.bind(this),
+			error: function(){
+				console.log("error handling edit");
+			}
+		});
+		this.props.update();
+		this.setState({showModal: false});
+	},
 	render: function(){
 		var date = new Date(this.props.date);
 		var buttonClass = "noShow";
@@ -213,6 +238,78 @@ var MealItem = React.createClass({
 			<div onMouseEnter={this.mouseEnter} onMouseLeave={this.mouseLeave} className="mealItem">
 				<p>{this.props.chef} is making {this.props.food}</p>
 				<img className={buttonClass} src="delete.svg" onClick={this.deleteMeal}/>
+				<img className={buttonClass} src="edit.svg" onClick={this.editMeal}/>
+				<Modal show={this.state.showModal} onHide={this.cancel} >
+					<EditMealDialog save={this.handleEdit} cancel={this.cancel} date={this.props.date} id={this.props.id}/>
+				</Modal>
+			</div>
+		);
+	}
+});
+
+var EditMealDialog = React.createClass({
+	getInitialState: function(){
+		return {chef: "", meal: ""};
+	},
+	componentDidMount: function(){
+		this.loadData();
+	},
+	loadData: function(){
+		//TODO: Load data with AJAX code
+		var mealURL = '/meals/' + this.props.id;
+		console.log("sending request to url: " + mealURL);
+		$.ajax({
+			url: mealURL,
+			dataType: 'json',
+			type: 'GET',
+			cache: false,
+			success: function(meal){
+				console.log("got meal data: " + meal.chef + " and " + meal.food);
+				this.setState({chef: meal.chef, meal: meal.food});
+			}.bind(this),
+			error: function(){
+				console.log("error getting meal data");
+			}
+		});
+	},
+	updateChef: function(e){
+		this.setState({chef: e.target.value});
+	},
+	updateMeal: function(e){
+		this.setState({meal: e.target.value});
+	},
+	render: function(){
+		return(
+			<div>
+				<Modal.Header closeButton>
+					<Modal.Title>Edit meal</Modal.Title>
+				</Modal.Header>
+				<Modal.Body>
+					<FormGroup controlId="chef">
+						<ControlLabel>Chef Name</ControlLabel>
+						<FormControl
+							type="text"
+							value={this.state.chef}
+							placeholder="Who are you?!"
+							onChange={this.updateChef}
+						/>
+					</FormGroup>
+					<FormGroup>
+						<ControlLabel>Whatcha cookin&#39;?</ControlLabel>
+						<FormControl
+							type="text"
+							value={this.state.meal}
+							placeholder="What's the dish called?"
+							onChange={this.updateMeal}
+						/>
+					</FormGroup>
+					<Button onClick={this.props.save.bind(null, this.state.chef, this.state.meal, this.props.id)}>
+						Save
+					</Button>
+					<Button onClick={this.props.cancel}>
+						Cancel
+					</Button>
+				</Modal.Body>
 			</div>
 		);
 	}

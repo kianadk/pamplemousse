@@ -50,6 +50,32 @@ router.route('/meals')
 		});
 	});
 
+router.route('/meals/:id')
+	.get(function(req, res){
+		console.log("trying to find meal");
+		Meal.findById(req.params.id, function(err, meal){
+			if(err){
+				console.log("error encountered");
+				res.send(err);
+			}
+			res.json(meal)
+		});
+	})
+	.put(function(req, res){
+		console.log("trying to update meal");
+		Meal.findById(req.params.id, function(err, meal){
+			if(err)
+				res.send(err);
+			meal.chef = req.body.chef;
+			meal.food = req.body.food;
+			meal.save(function(err){
+				if(err)
+					res.send(err);
+				res.json({message: 'successful update'});
+			});
+		});
+	});
+
 app.use(express.static('.'))
 app.use('/', router);
 
